@@ -43,7 +43,6 @@ DEEP1 = np.array(data['Porosity'])
 TEPD = np.vstack(DEEP1[0:train])
 PHIF = np.array(FPoro)
 Train_Tiab_PHIF = np.vstack(PHIF[0:train])
-print(train_data.shape, Train_Tiab_PHIF.shape)
 # print('Train :',"\n",TEPD[0])
 
 # validation data

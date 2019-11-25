@@ -43,7 +43,6 @@ def calculate_fitness(GA_PHIF, Train_Tiab_PHIF,train):
 
     score = []
     for i in range(Train_Tiab_PHIF.shape[0]):
-        print(i, GA_PHIF.shape[0])
         # score.append(np.sqrt(np.mean((GA_PHIF[i, :] - Train_Tiab_PHIF[i]) ** 2)))
         score.append(np.sqrt(np.sum((GA_PHIF[:, i] - Train_Tiab_PHIF[i]) ** 2) / train))
     fitness = np.array(score)
