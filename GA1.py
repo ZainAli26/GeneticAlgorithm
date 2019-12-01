@@ -11,7 +11,7 @@ np.set_printoptions(precision=6)
 def create_starting_population(solutions, weights):
     # Set up an initial array of all zeros
     pop_size = (solutions, weights)
-    population= np.random.uniform(low=-0.2, high=0.3, size=pop_size)
+    population= np.random.normal(size=pop_size)
     return population
 # print(create_starting_population(5, 3))
 
@@ -30,11 +30,14 @@ def calculate_Obj_function(train_data, population, num_weights):
 
     for data in range(population.shape[0]):
         # GA_PHIF = np.empty([train_data.shape[0], train_data.shape[0]])
-        pop = np.empty([train_data.shape[0], num_weights])
-        pop[0:, :] = population[data,:]
+        pop = np.empty([num_weights])
+        pop = population[data,:]
+        #print(pop.shape,train_data.shape, population[data,:].shape)
         for dt in range(train_data.shape[0]):
-            GA_PHIF_arr.append(np.sum(train_data[dt,:]*pop[dt,:]))
+            val = np.sum(train_data[dt,:]*pop)
+            GA_PHIF_arr.append(np.tanh(val))
         GA = np.array(GA_PHIF_arr)
+        # print(GA)
     GA_PHIF = GA.reshape(population.shape[0], train_data.shape[0])
     return GA_PHIF # should be positive Error
 
@@ -66,7 +69,7 @@ def select_mating_pool(population, fitness, num_parents):
 
 # Defining Crossover operator
 # to Produce children from parents – crossover
-def breed_by_crossover(parents, offspring_size):
+def breed_by_crossover(parents, Train_Tiab_PHIF, train_data, offspring_size):
     offspring = np.empty(offspring_size)  ## edited
 
     a = 0.7  #uint8	Unsigned integer (0 to 255)
@@ -77,8 +80,25 @@ def breed_by_crossover(parents, offspring_size):
         parent1_idx = child_ID_no % parents.shape[0]        # Index of the first parent to mate.
         parent2_idx = (child_ID_no + 1) % parents.shape[0]  # Index of the second parent to mate.
 
-        offspring[parent1_idx, :] = a*parents[parent1_idx, :] + (1-a)*parents[parent2_idx, :]
-        offspring[parent2_idx, :] = (1-a)*parents[parent1_idx, :] + a*parents[parent2_idx, :]
+        if child_ID_no % 1 == 0:
+            offspring[parent1_idx, :] = parents[parent1_idx, :]
+        else:
+            offspring[parent1_idx, :] = (1-a)*parents[parent1_idx, :] + a*parents[parent2_idx, :]
+        # pop = offspring[parent1_idx, :]
+        # GA_PHIF_arr = []
+        # for dt in range(train_data.shape[0]):
+        #     val = np.sum(train_data[dt,:]*pop)
+        #     GA_PHIF_arr.append(val)
+        # GA = np.array(GA_PHIF_arr)
+        # Train_Tiab_PHIF = Train_Tiab_PHIF.reshape((GA.shape))
+        # GA = (GA - Train_Tiab_PHIF[0])
+        # grad = []
+        # for i in range(GA.shape[0]):
+        #     grad.append(GA[i] * train_data[i])
+        # #grad = GA * train_data
+        # grad = np.array(grad)
+        # grad = np.sum(grad, axis=0)
+        # offspring[parent1_idx, :] = offspring[parent1_idx, :] - 0.01*grad
     return offspring
 
 # Defining Mutation operator
@@ -88,10 +108,10 @@ def randomly_mutate_population(offspring_mutation):
     # Apply random mutation
     for idx in range(offspring_mutation.shape[0]):
         chromosome_length = len(offspring_mutation[0,:])
-        mutation_point = random.randint(1, chromosome_length-1)
-        random_value = np.random.uniform(-0.01, 0.01, 1)                          # The random value to be added to the gene.
-        offspring_mutation[idx, mutation_point] = offspring_mutation[idx, mutation_point] + random_value ##error
-
+        for t_ in range(3):
+            mutation_point = random.randint(1, chromosome_length-1)
+            random_value = np.random.normal(size=1)                      # The random value to be added to the gene.
+            offspring_mutation[idx, mutation_point] = offspring_mutation[idx, mutation_point] + random_value ##error
     # Return mutated offspring
     return offspring_mutation
 

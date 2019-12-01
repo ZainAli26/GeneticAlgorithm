@@ -5,6 +5,7 @@ import GA1
 import time
 import matplotlib.pyplot as plt
 import Output_plot1
+from sklearn.metrics import r2_score
 ###################################
 ###################################
 
@@ -15,6 +16,19 @@ data = pd.read_csv('Actual.csv')#, encoding = "utf-8", error_bad_lines=False)
 #data_X = np.array(data[['Cons','CAL', 'GR', 'RHOB', 'NPHI', 'LLM', 'DT']])
 data_X = np.array(data[["Depth (m)","GR","RHOB","NPHI","RESD","DT","DTs"]])
 #print(data_X)
+
+
+x = data_X
+x = np.array(x)
+y = np.power(x, 2)
+d = np.power(x, 3)
+e = np.power(x, 4)
+data_X = np.hstack((x, y, d, e))
+mean = np.mean(data_X, axis=0)
+data_X = (data_X - mean)/np.max(data_X, axis=0)
+# print(data["GR"])
+# print(data.max())
+# print(data.min())
 
 m = 2
 Rho_fluid = 1
@@ -64,7 +78,7 @@ Test_Tiab_PHIF = np.vstack(PHIF[validation:test])
 #  Create a starting random population
 sol_per_pop = 400
 num_parents = 200
-num_weights = 7
+num_weights = 28
 # print(num_parents)
 
 population = GA1.create_starting_population(sol_per_pop, num_weights)
@@ -110,7 +124,7 @@ for generation in range(num_generations):
     # Selecting the best parents in the population for mating.
     parents = GA1.select_mating_pool(population, fitness, num_parents)
     # Generating next generation using crossover.
-    offspring = GA1.breed_by_crossover(parents, offspring_size=(population.shape[0] - parents.shape[0], num_weights))
+    offspring = GA1.breed_by_crossover(parents, Train_Tiab_PHIF, train_data, offspring_size=(population.shape[0] - parents.shape[0], num_weights))
     # Generating mutated offspring.
     offspring_mutation = GA1.randomly_mutate_population(offspring)
     # Creating the new population based on the parents and offspring.
@@ -161,15 +175,19 @@ print("Cost (Validation data):", cost2)
 cost3 = GA1.best_cost(Test_Tiab_PHIF,Test_GA_PHIF,test)
 print("Cost (Test data):", cost3)
 
+print("Coeff of Det. Train",r2_score(Train_Tiab_PHIF, Train_GA_PHIF))
+print("Coeff of Det. Test",r2_score(Test_Tiab_PHIF, Test_GA_PHIF))
+print("Coeff of Det. Val",r2_score(Validation_Tiab_PHIF, Valida_GA_PHIF))
+
 end = time.time()
 print("Time in seconds:",end - start,"s")
 
 ############################################################################################
 ############################################################################################
 
-Output_plot1.Analysis_plot(Train_Tiab_PHIF, Test_Tiab_PHIF, Validation_Tiab_PHIF, Train_GA_PHIF, Test_GA_PHIF, Valida_GA_PHIF, TEPD, Depth, DEPT)
-plt.show()
-# Analysis_plot.fitness_plot(gen, bestfit)
+# Output_plot1.Analysis_plot(Train_Tiab_PHIF, Test_Tiab_PHIF, Validation_Tiab_PHIF, Train_GA_PHIF, Test_GA_PHIF, Valida_GA_PHIF, TEPD, Depth, DEPT)
 # plt.show()
-Output_plot1.cost_plot(gen, bestcost_train, bestcost_validation,bestcost_test)
-plt.show()
+# # Analysis_plot.fitness_plot(gen, bestfit)
+# # plt.show()
+# Output_plot1.cost_plot(gen, bestcost_train, bestcost_validation,bestcost_test)
+# plt.show()
