@@ -81,7 +81,7 @@ def breed_by_crossover(parents, Train_Tiab_PHIF, train_data, offspring_size):
         parent2_idx = (child_ID_no + 1) % parents.shape[0]  # Index of the second parent to mate.
 
         if child_ID_no % 1 == 0:
-            offspring[parent1_idx, :] = parents[parent1_idx, :]
+            offspring[parent1_idx, :] = a*parents[parent1_idx, :] + (1-a)*parents[parent2_idx, :]
         else:
             offspring[parent1_idx, :] = (1-a)*parents[parent1_idx, :] + a*parents[parent2_idx, :]
         # pop = offspring[parent1_idx, :]

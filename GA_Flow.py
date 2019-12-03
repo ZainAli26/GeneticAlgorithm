@@ -16,7 +16,7 @@ data = pd.read_csv('Actual.csv')#, encoding = "utf-8", error_bad_lines=False)
 #data_X = np.array(data[['Cons','CAL', 'GR', 'RHOB', 'NPHI', 'LLM', 'DT']])
 data_X = np.array(data[["Depth (m)","GR","RHOB","NPHI","RESD","DT","DTs"]])
 #print(data_X)
-
+PHIF = data["Porosity"]
 
 x = data_X
 x = np.array(x)
@@ -34,13 +34,7 @@ m = 2
 Rho_fluid = 1
 Rho_ma = 2.44 # Rho_limestone
 
-# Calculate Target Fracture Poroity using Elkewidy and Tiab method
-def porosity(Rho_ma):
-    data['PHID'] = (Rho_ma - data['RHOB']) / (Rho_ma - Rho_fluid)
-    data['PHIt'] = (data['NPHI'] + data['PHID']) / 2
-    data['PHIF'] = ((data['PHIt']**(m + 1)) - (data['PHIt']**m)) / ((data['PHIt']**m) - 1)
-    return data[['PHIF']]
-FPoro = porosity(Rho_ma)
+FPoro = [""]
 # print(FPoro)
 
 # Data splitting
@@ -55,7 +49,7 @@ train_data = data_X[0:train]
 DEEP1 = np.array(data['Porosity'])
 #print(DEEP1)
 TEPD = np.vstack(DEEP1[0:train])
-PHIF = np.array(FPoro)
+#PHIF = np.array(FPoro)
 Train_Tiab_PHIF = np.vstack(PHIF[0:train])
 # print('Train :',"\n",TEPD[0])
 
@@ -64,7 +58,7 @@ validation_data = data_X[train:validation]
 DEEP3 = np.array(data['Porosity'])
 #print(DEEP3[train:validation])
 Depth = np.vstack(DEEP3[train:validation])
-PHIF = np.array(FPoro)
+#PHIF = np.array(FPoro)
 Validation_Tiab_PHIF = np.vstack(PHIF[train:validation])
 # print('Train :',"\n",Depth[0])
 
@@ -181,6 +175,14 @@ print("Coeff of Det. Val",r2_score(Validation_Tiab_PHIF, Valida_GA_PHIF))
 
 end = time.time()
 print("Time in seconds:",end - start,"s")
+file_ = open("results.csv",'w')
+file_.write("Depth" + "," + "Porosity" + "," + "Prediction" + "\n")
+for i in range(len(Train_GA_PHIF)):
+    file_.write(str(train_data[i][0]) + "," + str(Train_Tiab_PHIF[i]) + "," + str(Train_GA_PHIF[i]) + "\n")
+for i in range(len(Validation_Tiab_PHIF)):
+    file_.write(str(validation_data[i][0]) + "," + str(Validation_Tiab_PHIF[i]) + "," + str(Valida_GA_PHIF[i]) + "\n")
+for i in range(len(Test_Tiab_PHIF)):
+    file_.write(str(test_data[i][0]) + "," + str(Test_Tiab_PHIF[i]) + "," + str(Test_GA_PHIF[i]) + "\n")
 
 ############################################################################################
 ############################################################################################
